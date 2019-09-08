@@ -36,7 +36,7 @@ SCL  -  A5
 *//////////////////////////////////////////////////////////////////////////////////////
 
 //Include LCD and I2C library
-#include <LiquidCrystal_I2C.h>
+//#include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
 //Declaring some global variables
@@ -53,35 +53,16 @@ float angle_roll_acc, angle_pitch_acc;
 float angle_pitch_output, angle_roll_output;
 
 //Initialize the LCD library
-LiquidCrystal_I2C lcd(0x27,16,2);
 
 
 void setup() {
   Wire.begin();                                                        //Start I2C as master
-  //Serial.begin(57600);                                               //Use only for debugging
-  pinMode(13, OUTPUT);                                                 //Set output 13 (LED) as output
+  Serial.begin(57600);                                               //Use only for debugging
   
   setup_mpu_6050_registers();                                          //Setup the registers of the MPU-6050 (500dfs / +/-8g) and start the gyro
 
-  digitalWrite(13, HIGH);                                              //Set digital output 13 high to indicate startup
-
-  lcd.begin();                                                         //Initialize the LCD
-  lcd.backlight();                                                     //Activate backlight
-  lcd.clear();                                                         //Clear the LCD
-
-  lcd.setCursor(0,0);                                                  //Set the LCD cursor to position to position 0,0
-  lcd.print("  MPU-6050 IMU");                                         //Print text to screen
-  lcd.setCursor(0,1);                                                  //Set the LCD cursor to position to position 0,1
-  lcd.print("     V1.0");                                              //Print text to screen
-
-  delay(1500);                                                         //Delay 1.5 second to display the text
-  lcd.clear();                                                         //Clear the LCD
-  
-  lcd.setCursor(0,0);                                                  //Set the LCD cursor to position to position 0,0
-  lcd.print("Calibrating gyro");                                       //Print text to screen
-  lcd.setCursor(0,1);                                                  //Set the LCD cursor to position to position 0,1
+                                                //Set the LCD cursor to position to position 0,1
   for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
-    if(cal_int % 125 == 0)lcd.print(".");                              //Print a dot on the LCD every 125 readings
     read_mpu_6050_data();                                              //Read the raw acc and gyro data from the MPU-6050
     gyro_x_cal += gyro_x;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
     gyro_y_cal += gyro_y;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
@@ -92,19 +73,15 @@ void setup() {
   gyro_y_cal /= 2000;                                                  //Divide the gyro_y_cal variable by 2000 to get the avarage offset
   gyro_z_cal /= 2000;                                                  //Divide the gyro_z_cal variable by 2000 to get the avarage offset
 
-  lcd.clear();                                                         //Clear the LCD
   
-  lcd.setCursor(0,0);                                                  //Set the LCD cursor to position to position 0,0
-  lcd.print("Pitch:");                                                 //Print text to screen
-  lcd.setCursor(0,1);                                                  //Set the LCD cursor to position to position 0,1
-  lcd.print("Roll :");                                                 //Print text to screen
-  
-  digitalWrite(13, LOW);                                               //All done, turn the LED off
+
   
   loop_timer = micros();                                               //Reset the loop timer
 }
 
 void loop(){
+ // Serial.println(gyro_x);
+ 
 
   read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050
 
@@ -144,11 +121,12 @@ void loop(){
   //To dampen the pitch and roll angles a complementary filter is used
   angle_pitch_output = angle_pitch_output * 0.9 + angle_pitch * 0.1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
   angle_roll_output = angle_roll_output * 0.9 + angle_roll * 0.1;      //Take 90% of the output roll value and add 10% of the raw roll value
-  
-  write_LCD();                                                         //Write the roll and pitch values to the LCD display
 
+ Serial.println(angle_pitch);
   while(micros() - loop_timer < 4000);                                 //Wait until the loop_timer reaches 4000us (250Hz) before starting the next loop
-  loop_timer = micros();                                               //Reset the loop timer
+  loop_timer = micros();  
+   Serial.println("af");
+//Reset the loop timer
 }
 
 
@@ -166,40 +144,6 @@ void read_mpu_6050_data(){                                             //Subrout
   gyro_y = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_y variable
   gyro_z = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_z variable
 
-}
-
-void write_LCD(){                                                      //Subroutine for writing the LCD
-  //To get a 250Hz program loop (4us) it's only possible to write one character per loop
-  //Writing multiple characters is taking to much time
-  if(lcd_loop_counter == 14)lcd_loop_counter = 0;                      //Reset the counter after 14 characters
-  lcd_loop_counter ++;                                                 //Increase the counter
-  if(lcd_loop_counter == 1){
-    angle_pitch_buffer = angle_pitch_output * 10;                      //Buffer the pitch angle because it will change
-    lcd.setCursor(6,0);                                                //Set the LCD cursor to position to position 0,0
-  }
-  if(lcd_loop_counter == 2){
-    if(angle_pitch_buffer < 0)lcd.print("-");                          //Print - if value is negative
-    else lcd.print("+");                                               //Print + if value is negative
-  }
-  if(lcd_loop_counter == 3)lcd.print(abs(angle_pitch_buffer)/1000);    //Print first number
-  if(lcd_loop_counter == 4)lcd.print((abs(angle_pitch_buffer)/100)%10);//Print second number
-  if(lcd_loop_counter == 5)lcd.print((abs(angle_pitch_buffer)/10)%10); //Print third number
-  if(lcd_loop_counter == 6)lcd.print(".");                             //Print decimal point
-  if(lcd_loop_counter == 7)lcd.print(abs(angle_pitch_buffer)%10);      //Print decimal number
-
-  if(lcd_loop_counter == 8){
-    angle_roll_buffer = angle_roll_output * 10;
-    lcd.setCursor(6,1);
-  }
-  if(lcd_loop_counter == 9){
-    if(angle_roll_buffer < 0)lcd.print("-");                           //Print - if value is negative
-    else lcd.print("+");                                               //Print + if value is negative
-  }
-  if(lcd_loop_counter == 10)lcd.print(abs(angle_roll_buffer)/1000);    //Print first number
-  if(lcd_loop_counter == 11)lcd.print((abs(angle_roll_buffer)/100)%10);//Print second number
-  if(lcd_loop_counter == 12)lcd.print((abs(angle_roll_buffer)/10)%10); //Print third number
-  if(lcd_loop_counter == 13)lcd.print(".");                            //Print decimal point
-  if(lcd_loop_counter == 14)lcd.print(abs(angle_roll_buffer)%10);      //Print decimal number
 }
 
 void setup_mpu_6050_registers(){
