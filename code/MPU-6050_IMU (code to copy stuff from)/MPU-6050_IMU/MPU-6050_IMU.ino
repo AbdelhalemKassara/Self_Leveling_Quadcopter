@@ -40,17 +40,16 @@ SCL  -  A5
 #include <Wire.h>
 
 //Declaring some global variables
-int gyro_x, gyro_y, gyro_z;
-long acc_x, acc_y, acc_z, acc_total_vector;
-int temperature;
-long gyro_x_cal, gyro_y_cal, gyro_z_cal;
-long loop_timer;
-int lcd_loop_counter;
+int GyX, GyY, GyZ; // changed
+long AcX, AcY, AcZ, TotalAcc;// changed
+int Tmp;// changed
+long GyXOff, GyYOff, GyZOff;// changed 
+long Timer;// changed
 float angle_pitch, angle_roll;
 int angle_pitch_buffer, angle_roll_buffer;
 boolean set_gyro_angles;
 float angle_roll_acc, angle_pitch_acc;
-float angle_pitch_output, angle_roll_output;
+float Pitch, Roll;// changed 
 
 //Initialize the LCD library
 
@@ -62,21 +61,21 @@ void setup() {
   setup_mpu_6050_registers();                                          //Setup the registers of the MPU-6050 (500dfs / +/-8g) and start the gyro
 
                                                 //Set the LCD cursor to position to position 0,1
-  for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
+  for (int i = 0; i < 2000 ; i ++){                  //Run this code 2000 times
     read_mpu_6050_data();                                              //Read the raw acc and gyro data from the MPU-6050
-    gyro_x_cal += gyro_x;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
-    gyro_y_cal += gyro_y;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
-    gyro_z_cal += gyro_z;                                              //Add the gyro z-axis offset to the gyro_z_cal variable
+    GyXOff += GyX;                                              //Add the gyro x-axis offset to the GyXOff variable
+    GyYOff += GyY;                                              //Add the gyro y-axis offset to the GyYOff variable
+    GyZOff += GyZ;                                              //Add the gyro z-axis offset to the GyZOff variable
     delay(3);                                                          //Delay 3us to simulate the 250Hz program loop
   }
-  gyro_x_cal /= 2000;                                                  //Divide the gyro_x_cal variable by 2000 to get the avarage offset
-  gyro_y_cal /= 2000;                                                  //Divide the gyro_y_cal variable by 2000 to get the avarage offset
-  gyro_z_cal /= 2000;                                                  //Divide the gyro_z_cal variable by 2000 to get the avarage offset
+  GyXOff /= 2000;                                                  //Divide the GyXOff variable by 2000 to get the avarage offset
+  GyYOff /= 2000;                                                  //Divide the GyYOff variable by 2000 to get the avarage offset
+  GyZOff /= 2000;                                                  //Divide the GyZOff variable by 2000 to get the avarage offset
 
   
 
   
-  loop_timer = micros();                                               //Reset the loop timer
+  Timer = micros();                                               //Reset the loop timer
 }
 
 void loop(){
@@ -84,24 +83,24 @@ void loop(){
 
   read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050
 
-  gyro_x -= gyro_x_cal;                                                //Subtract the offset calibration value from the raw gyro_x value
-  gyro_y -= gyro_y_cal;                                                //Subtract the offset calibration value from the raw gyro_y value
-  gyro_z -= gyro_z_cal;                                                //Subtract the offset calibration value from the raw gyro_z value
+  GyX -= GyXOff;                                                //Subtract the offset calibration value from the raw GyX value
+  GyY -= GyYOff;                                                //Subtract the offset calibration value from the raw GyY value
+  GyZ -= GyZOff;                                                //Subtract the offset calibration value from the raw GyZ value
   
   //Gyro angle calculations
   //0.0000611 = 1 / (250Hz / 65.5)
-  angle_pitch += gyro_x * 0.0000611;                                   //Calculate the traveled pitch angle and add this to the angle_pitch variable
-  angle_roll += gyro_y * 0.0000611;                                    //Calculate the traveled roll angle and add this to the angle_roll variable
+  angle_pitch += GyX * 0.0000611;                                   //Calculate the traveled pitch angle and add this to the angle_pitch variable
+  angle_roll += GyY * 0.0000611;                                    //Calculate the traveled roll angle and add this to the angle_roll variable
   
   //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-  angle_pitch += angle_roll * sin(gyro_z * 0.000001066);               //If the IMU has yawed transfer the roll angle to the pitch angel
-  angle_roll -= angle_pitch * sin(gyro_z * 0.000001066);               //If the IMU has yawed transfer the pitch angle to the roll angel
+  angle_pitch += angle_roll * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the roll angle to the pitch angel
+  angle_roll -= angle_pitch * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the pitch angle to the roll angel
   
   //Accelerometer angle calculations
-  acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));  //Calculate the total accelerometer vector
+  TotalAcc = sqrt((AcX*AcX)+(AcY*AcY)+(AcZ*AcZ));  //Calculate the total accelerometer vector
   //57.296 = 1 / (3.142 / 180) The Arduino asin function is in radians
-  angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;       //Calculate the pitch angle
-  angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;       //Calculate the roll angle
+  angle_pitch_acc = asin((float)AcY/TotalAcc)* 57.296;       //Calculate the pitch angle
+  angle_roll_acc = asin((float)AcX/TotalAcc)* -57.296;       //Calculate the roll angle
   
   //Place the MPU-6050 spirit level and note the values in the following two lines for calibration
   angle_pitch_acc -= 0.0;                                              //Accelerometer calibration value for pitch
@@ -118,11 +117,11 @@ void loop(){
   }
   
   //To dampen the pitch and roll angles a complementary filter is used
-  angle_pitch_output = angle_pitch_output * 0.9 + angle_pitch * 0.1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
-  angle_roll_output = angle_roll_output * 0.9 + angle_roll * 0.1;      //Take 90% of the output roll value and add 10% of the raw roll value
+  Pitch = Pitch * 0.9 + angle_pitch * 0.1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
+  Roll = Roll * 0.9 + angle_roll * 0.1;      //Take 90% of the output roll value and add 10% of the raw roll value
 
-  while(micros() - loop_timer < 4000);                                 //Wait until the loop_timer reaches 4000us (250Hz) before starting the next loop
-  loop_timer = micros();  
+  while(micros() - Timer < 4000);                                 //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
+  Timer = micros();  
 //Reset the loop timer
 }
 
@@ -133,13 +132,13 @@ void read_mpu_6050_data(){                                             //Subrout
   Wire.endTransmission();                                              //End the transmission
   Wire.requestFrom(0x68,14);                                           //Request 14 bytes from the MPU-6050
   while(Wire.available() < 14);                                        //Wait until all the bytes are received
-  acc_x = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the acc_x variable
-  acc_y = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the acc_y variable
-  acc_z = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the acc_z variable
-  temperature = Wire.read()<<8|Wire.read();                            //Add the low and high byte to the temperature variable
-  gyro_x = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_x variable
-  gyro_y = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_y variable
-  gyro_z = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_z variable
+  AcX = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the AcX variable
+  AcY = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the AcY variable
+  AcZ = Wire.read()<<8|Wire.read();                                  //Add the low and high byte to the AcZ variable
+  Tmp = Wire.read()<<8|Wire.read();                            //Add the low and high byte to the Tmp variable
+  GyX = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the GyX variable
+  GyY = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the GyY variable
+  GyZ = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the GyZ variable
 
 }
 

@@ -8,9 +8,10 @@
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 int AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 long GyXOff, GyYOff, GyZOff;
-int Roll, Pitch, Yaw;
 int GyRoll, GyPitch, GyYaw;
-int AccRoll, AccPitch, AccYaw;
+int AccRoll, AccPitch, AccYaw;//
+float Roll, Pitch, Yaw;// final output
+
 long Timer;
 long TotalAcc;
 
