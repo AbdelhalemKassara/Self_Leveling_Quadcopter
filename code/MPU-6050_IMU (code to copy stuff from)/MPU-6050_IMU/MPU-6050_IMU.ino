@@ -80,7 +80,6 @@ void setup() {
 }
 
 void loop(){
- // Serial.println(gyro_x);
  
 
   read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050
@@ -122,10 +121,8 @@ void loop(){
   angle_pitch_output = angle_pitch_output * 0.9 + angle_pitch * 0.1;   //Take 90% of the output pitch value and add 10% of the raw pitch value
   angle_roll_output = angle_roll_output * 0.9 + angle_roll * 0.1;      //Take 90% of the output roll value and add 10% of the raw roll value
 
- Serial.println(angle_pitch);
   while(micros() - loop_timer < 4000);                                 //Wait until the loop_timer reaches 4000us (250Hz) before starting the next loop
   loop_timer = micros();  
-   Serial.println("af");
 //Reset the loop timer
 }
 
