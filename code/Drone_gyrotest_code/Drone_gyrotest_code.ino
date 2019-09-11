@@ -7,8 +7,8 @@
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 int AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 long GyXOff, GyYOff, GyZOff;
-int GyRoll, GyPitch, GyYaw;
-int AccRoll, AccPitch, AccYaw;//
+float GyRoll, GyPitch, GyYaw;
+float AccRoll, AccPitch, AccYaw;//
 float Roll, Pitch, Yaw;// final output
 bool set_gyro_angles;
 long Timer;
@@ -28,15 +28,13 @@ void loop() {
   GetPosition();
  
   GyroAngles();
-  Serial.println(GyPitch);
-  Serial.println(GyRoll);
  
-  YawTransfer();
+//  YawTransfer();
   // do movement here
-  AccelAngles();
+  //AccelAngles();
  
-  CorrGyDrift();
-  CompFilter();
+// CorrGyDrift();
+ // CompFilter();
   while(micros() - Timer < 4000){                                 //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
   //do nothing unitl the time reaches 4000us for the required 250Hz frequency
   }
@@ -61,16 +59,16 @@ void GetPosition() {
 }
 
 void OffSetGyro() {
-  for (int i = 1; i <= 2000; i++) {
+  for (int i = 1; i <= 500; i++) {
     GetPosition();
     GyZOff += GyZ;
     GyYOff += GyY;
     GyXOff += GyX;
     delay(3);
   }
-  GyZOff /= 2000;
-  GyYOff /= 2000;
-  GyXOff /= 2000;
+  GyZOff /= 500;
+  GyYOff /= 500;
+  GyXOff /= 500;
 
 }
 
@@ -101,6 +99,8 @@ void GyroAngles() {
   GyPitch += GyX * 0.0000611;
   GyRoll += GyY * 0.0000611;
   GyYaw += GyZ * 0.0000611;
+  Serial.println(GyX);
+  Serial.println(GyPitch);
 
   Timer = micros();
 
