@@ -40,31 +40,32 @@ void setup() {
 void loop(){
  
 
-//  read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050/
+  read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050/
 
-  //GyX -= GyXOff;                                                //Subtract the offset calibration value from the raw GyX value
-  //GyY -= GyYOff;                                                //Subtract the offset calibration value from the raw GyY value
- // GyZ -= GyZOff;                                                //Subtract the offset calibration value from the raw GyZ value
+ GyX -= GyXOff;                                                //Subtract the offset calibration value from the raw GyX value
+ GyY -= GyYOff;                                                //Subtract the offset calibration value from the raw GyY value
+  GyZ -= GyZOff;                                                //Subtract the offset calibration value from the raw GyZ value
   
   //Gyro angle calculations
   //0.0000611 = 1 / (250Hz / 65.5)
- // GyPitch += GyX * 0.0000611;                                   //Calculate the traveled pitch angle and add this to the angle_pitch variable
- // GyRoll += GyY * 0.0000611;                                    //Calculate the traveled roll angle and add this to the angle_roll variable
+  GyPitch += GyX * 0.0000611;                                   //Calculate the traveled pitch angle and add this to the angle_pitch variable
+  GyRoll += GyY * 0.0000611;                                    //Calculate the traveled roll angle and add this to the angle_roll variable
   
   //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
- // GyPitch += GyRoll * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the roll angle to the pitch angel
- // GyRoll -= GyPitch * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the pitch angle to the roll angel
-  
+  GyPitch += GyRoll * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the roll angle to the pitch angel
+  GyRoll -= GyPitch * sin(GyZ * 0.000001066);               //If the IMU has yawed transfer the pitch angle to the roll angel
+
+  Serial.println(GyRoll);
   //Accelerometer angle calculations
- // TotalAcc = sqrt((AcX*AcX)+(AcY*AcY)+(AcZ*AcZ));  //Calculate the total accelerometer vector
-  //57.296 = 1 / (3.142 / 180) The Arduino asin function is in radians
- // AccPitch = asin((float)AcY/TotalAcc)* 57.296;       //Calculate the pitch angle/
-//  AccRoll = asin((float)AcX/TotalAcc)* -57.296;       //Calculate the roll angle
+ TotalAcc = sqrt((AcX*AcX)+(AcY*AcY)+(AcZ*AcZ));  //Calculate the total accelerometer vector
+//57.296 = 1 / (3.142 / 180)// The Arduino asin function is in radians
+ AccPitch = asin((float)AcY/TotalAcc)* 57.296;       //Calculate the pitch angle/
+  AccRoll = asin((float)AcX/TotalAcc)* -57.296;       //Calculate the roll angle
   
   //Place the MPU-6050 spirit level and note the values in the following two lines for calibration
-//  AccPitch -= 0.0;                                              //Accelerometer calibration value for pitch
-//  AccRoll -= 0.0;                                               //Accelerometer calibration value for roll
-//
+  AccPitch -= 0.0;                                              //Accelerometer calibration value for pitch
+  AccRoll -= 0.0;                                               //Accelerometer calibration value for roll
+
   if(set_gyro_angles){                                                 //If the IMU is already started
     GyPitch = GyPitch * 0.9996 + AccPitch * 0.0004;     //Correct the drift of the gyro pitch angle with the accelerometer pitch angle
     GyRoll = GyRoll * 0.9996 + AccRoll * 0.0004;        //Correct the drift of the gyro roll angle with the accelerometer roll angle
