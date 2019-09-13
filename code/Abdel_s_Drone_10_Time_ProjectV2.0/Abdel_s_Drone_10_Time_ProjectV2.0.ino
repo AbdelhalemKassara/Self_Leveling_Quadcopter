@@ -1,9 +1,16 @@
 #include<Wire.h>
 #include <Servo.h>
 #include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h> 
+// make code more efficient
+// reciver
+RF24 radio(7, 8); 
+const byte address[6] = "00001";
 
+// gyro sensor
 int GyX, GyY, GyZ;
-long AcX, AcY, AcZ, TotalAcc;
+long AcX, AcY, AcZ, TotalAcc;// try variables with and int
 int Tmp;
 long GyXOff, GyYOff, GyZOff;
 long Timer;
@@ -12,29 +19,71 @@ boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
 
+// motors
+byte M1Speed; 
+byte M2Speed; 
+byte M3Speed; 
+byte M4Speed; 
+
+Servo OutM1;  
+Servo OutM2;  
+Servo OutM3;  
+Servo OutM4;  
+
+struct DataPackage {
+  byte XPos;  
+  byte YPos;  
+  bool ValUp; 
+  bool ValDown; 
+  bool StopProp;  
+};
+
+struct DataPackage Data;
+
+
 void setup() {
+  
+  // motors
+  OutM1.attach(9, 1000, 2000);  
+  OutM2.attach(3, 1000, 2000);  
+  OutM3.attach(5, 1000, 2000);  
+  OutM4.attach(6, 1000, 2000);  
+
+  SetupMotorController(); 
+  
+  //gyro/accel sensor
   Wire.begin();
-  Serial.begin(57600);
 
   setup_mpu_6050_registers();
   OffSetGyro();
 
-  Timer = micros();
+  // radio/ contorller
+  radio.begin(); 
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MAX); 
+  radio.startListening(); 
+  
+  Timer = micros();  
 }
 
 void loop() {
   GetPosition();
-
   GyroAngles();
-  Serial.println(GyPitch);
-//  Serial.println(GyRoll);
-  // do movement here
-  AccelAngles();
-
+  // get angles from here if you want to have very detailed
+   AccelAngles();
   CorrGyDrift();
   CompFilter();
-    //Serial.println(Pitch);
-  //Serial.println(Roll);
+  // get angles here if you want average or rounded
+  if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
+    radio.read(&Data, sizeof(DataPackage)); 
+  }
+  
+  // landing
+  if (Data.StopProp == HIGH) { 
+    AllMin(); 
+  }
+
+  UpdateSpeed();
 
   while (micros() - Timer < 4000) {                               //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
     //do nothing unitl the time reaches 4000us for the required 250Hz frequency
@@ -43,6 +92,44 @@ void loop() {
 
 }
 
+
+// functions
+void UpdateSpeed() {
+  OutM1.write(M1Speed);    
+  OutM2.write(M2Speed);    
+  OutM3.write(M3Speed);    
+  OutM4.write(M4Speed);    
+}
+
+void SetupMotorController() { 
+  delay(1000);
+
+  AllMin();
+  delay(2000);
+
+  AllMax(); 
+  delay(2000);  
+
+  AllMin(); 
+  delay(2000);
+}
+
+void AllMax() {
+  M1Speed = 180;
+  M2Speed = 180;
+  M3Speed = 180;
+  M4Speed = 180;
+  UpdateSpeed();
+}
+
+void AllMin() {
+  M1Speed = 0;
+  M2Speed = 0;
+  M3Speed = 0;
+  M4Speed = 0;
+  UpdateSpeed();
+
+}
 
 void GetPosition() {
   Wire.beginTransmission(0x68);
@@ -107,7 +194,6 @@ void GyroAngles() {
   GyRoll -= GyPitch * sin(GyZ * 0.000001066);// output values?? possibly for staying still
 
 }
-
 
 void AccelAngles() {
 
