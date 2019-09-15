@@ -11,7 +11,7 @@ float GyPitch, GyRoll;
 boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
-
+long height;
 void setup() {
   Wire.begin();
   Serial.begin(57600);
@@ -24,16 +24,17 @@ void setup() {
 
 void loop() {
   GetPosition();
-
   GyroAngles();
-  Serial.println(GyPitch);
+    Height();
+  //Serial.println(AcZ);
+
 //  Serial.println(GyRoll);
   // do movement here
   AccelAngles();
 
   CorrGyDrift();
   CompFilter();
-    //Serial.println(Pitch);
+    Serial.println(AccPitch);
   //Serial.println(Roll);
 
   while (micros() - Timer < 4000) {                               //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
@@ -107,7 +108,9 @@ void GyroAngles() {
   GyRoll -= GyPitch * sin(GyZ * 0.000001066);// output values?? possibly for staying still
 
 }
-
+void Height(){
+  height+= AcY;
+  }
 
 void AccelAngles() {
 
@@ -117,8 +120,8 @@ void AccelAngles() {
   AccRoll = asin((float)AcX / TotalAcc) * -57.296;
 
   //Place the MPU-6050 spirit level and note the values in the following two lines for calibration
-  AccPitch -= 0.0;                                              //Accelerometer calibration value for pitch
-  AccRoll -= 0.0;                                               //Accelerometer calibration value for roll
+  AccPitch -= -0.0;                                              //Accelerometer calibration value for pitch
+  AccRoll -= -0.0;                                               //Accelerometer calibration value for roll
 
 
 }

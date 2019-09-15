@@ -1,16 +1,9 @@
 #include<Wire.h>
 #include <Servo.h>
 #include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h> 
-// make code more efficient
-// reciver
-RF24 radio(7, 8); 
-const byte address[6] = "00001";
 
-// gyro sensor
 int GyX, GyY, GyZ;
-long AcX, AcY, AcZ, TotalAcc;// try variables with and int
+long AcX, AcY, AcZ, TotalAcc;
 int Tmp;
 long GyXOff, GyYOff, GyZOff;
 long Timer;
@@ -18,82 +11,42 @@ float GyPitch, GyRoll;
 boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
-
-// motors
-// front
-byte M1Speed; //black FL
-byte M2Speed; //red FR
-//rear
-byte M3Speed; //yellow RL
-byte M4Speed; //blue RR
-
-Servo OutM1;  
-Servo OutM2;  
-Servo OutM3;  
-Servo OutM4;  
-
-struct DataPackage {
-  byte XPos;  
-  byte YPos;  
-  bool ValUp; 
-  bool ValDown; 
-  bool StopProp;  
-};
-
-struct DataPackage Data;
-
+long AccPitchOffset,AccRollOffset;
 
 void setup() {
-  
-  // motors
-  OutM1.attach(9, 1000, 2000);  
-  OutM2.attach(3, 1000, 2000);  
-  OutM3.attach(5, 1000, 2000);  
-  OutM4.attach(6, 1000, 2000);  
-
-  SetupMotorController(); 
-  
-  //gyro/accel sensor
   Wire.begin();
+  Serial.begin(57600);
 
   setup_mpu_6050_registers();
   OffSetGyro();
 
-  // radio/ contorller
-  radio.begin(); 
-  radio.openReadingPipe(0, address);
-  radio.setPALevel(RF24_PA_MAX); 
-  radio.startListening(); 
-  
-  Timer = micros();  
+  Timer = micros();
 }
 
 void loop() {
-  if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
-    radio.read(&Data, sizeof(DataPackage)); 
-  }
-  
-  // landing
-  if (Data.StopProp == HIGH) { 
-    AllMin(); 
-  }
   GetPosition();
   GyroAngles();
-  //x get angles from here if you want to have very detailed
-// max motor speed is 180
-// need to get the height of the drone
-    M1Speed = ;
-  M2Speed = ;
-  M3Speed = ;
-  M4Speed = ;
-   AccelAngles();
+ Serial.println(GyPitch);
+
+  Serial.println(GyRoll);
+  // do movement here
+  AccelAngles();
+
   CorrGyDrift();
   CompFilter();
-  // get angles here if you want average or rounded
-  
+/*  for(int i=1; i<=2000; i++){
+    Serial.println(i);
+  GetPosition();
+      AccelAngles();
 
-  UpdateSpeed();
-
+   AccPitchOffset +=AccPitch;
+   AccRollOffset+=AccRoll;
+    }
+    AccRollOffset/2000;
+    AccPitchOffset/2000;
+    //Serial.println(AccPitchOffset);
+  //Serial.println(AccRollOffset);
+*/
   while (micros() - Timer < 4000) {                               //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
     //do nothing unitl the time reaches 4000us for the required 250Hz frequency
   }
@@ -101,44 +54,6 @@ void loop() {
 
 }
 
-
-// functions
-void UpdateSpeed() {
-  OutM1.write(M1Speed);    
-  OutM2.write(M2Speed);    
-  OutM3.write(M3Speed);    
-  OutM4.write(M4Speed);    
-}
-
-void SetupMotorController() { 
-  delay(1000);
-
-  AllMin();
-  delay(2000);
-
-  AllMax(); 
-  delay(2000);  
-
-  AllMin(); 
-  delay(2000);
-}
-
-void AllMax() {
-  M1Speed = 180;
-  M2Speed = 180;
-  M3Speed = 180;
-  M4Speed = 180;
-  UpdateSpeed();
-}
-
-void AllMin() {
-  M1Speed = 0;
-  M2Speed = 0;
-  M3Speed = 0;
-  M4Speed = 0;
-  UpdateSpeed();
-
-}
 
 void GetPosition() {
   Wire.beginTransmission(0x68);
@@ -157,7 +72,7 @@ void GetPosition() {
 
 void OffSetGyro() {
 
-  for (int i = 0; i < 2000 ; i ++) {
+  for (int i = 1; i < 2000 ; i ++) {
     GetPosition();
     GyXOff += GyX;
     GyYOff += GyY;
@@ -204,6 +119,7 @@ void GyroAngles() {
 
 }
 
+
 void AccelAngles() {
 
   TotalAcc = sqrt((AcX * AcX) + (AcY * AcY) + (AcZ * AcZ));
@@ -212,8 +128,8 @@ void AccelAngles() {
   AccRoll = asin((float)AcX / TotalAcc) * -57.296;
 
   //Place the MPU-6050 spirit level and note the values in the following two lines for calibration
-  AccPitch -= 0.0;                                              //Accelerometer calibration value for pitch
-  AccRoll -= 0.0;                                               //Accelerometer calibration value for roll
+  AccPitch -= -0.90;                                              //Accelerometer calibration value for pitch
+  AccRoll -= 0.68;                                               //Accelerometer calibration value for roll
 
 
 }
