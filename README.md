@@ -5,8 +5,11 @@ These instructions will get you a flying drone.
 
 ### Prerequisites
 2 arduinos 
+
 4 motors 
+
 4 motorcontrollers 
+
 2 wireless receivers/transmitters
 
 ### Installing
