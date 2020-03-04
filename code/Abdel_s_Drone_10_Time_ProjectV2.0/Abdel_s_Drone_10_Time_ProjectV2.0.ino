@@ -19,6 +19,8 @@ boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
 
+int HeightOfDrone;
+
 // motors
 // front
 byte M1Speed; //black FL
@@ -82,10 +84,6 @@ void loop() {
   //x get angles from here if you want to have very detailed
   // max motor speed is 180
   // need to get the height of the drone
-  M1Speed = ;
-  M2Speed = ;
-  M3Speed = ;
-  M4Speed = ;
   AccelAngles();
   CorrGyDrift();
   CompFilter();
@@ -101,7 +99,19 @@ void loop() {
 
 }
 
-
+void Movment(){
+  if(Data.StopProp){
+    AllMin();
+  }else{
+    
+  }
+}
+void LevelDrone(byte x, byte y){
+  
+}
+void GetHeigth(){
+  
+}
 // functions
 void UpdateSpeed() {
   OutM1.write(M1Speed);
