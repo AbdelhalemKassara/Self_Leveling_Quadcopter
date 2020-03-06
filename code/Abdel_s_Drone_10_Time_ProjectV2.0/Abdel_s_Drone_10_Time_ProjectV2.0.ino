@@ -99,19 +99,7 @@ void loop() {
 
 }
 
-void Movment(){
-  if(Data.StopProp){
-    AllMin();
-  }else{
-    
-  }
-}
-void LevelDrone(byte x, byte y){
-  
-}
-void GetHeigth(){
-  
-}
+
 // functions
 void UpdateSpeed() {
   OutM1.write(M1Speed);
