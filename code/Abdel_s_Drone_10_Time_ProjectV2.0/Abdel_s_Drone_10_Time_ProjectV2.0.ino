@@ -8,6 +8,10 @@
 RF24 radio(7, 8);
 const byte address[6] = "00001";
 
+//Ultrasonic sensor var
+const int trigPin = 4;
+const int echoPin = 2;
+
 // gyro sensor
 int GyX, GyY, GyZ;
 long AcX, AcY, AcZ, TotalAcc;// try variables with and int
@@ -46,7 +50,9 @@ struct DataPackage Data;
 
 
 void setup() {
-
+  //gyroscope
+  pinMode(trigPin,OUTPUT);
+  pinMode(echoPin,INPUT);
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
@@ -71,6 +77,12 @@ void setup() {
 }
 
 void loop() {
+  //gyroscope
+  digitalWrite(trigPIn,LOW);
+  //need to still loop through the rest of the code
+  digitalWrite(trigPin,HIGH);
+
+  //
   if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
     radio.read(&Data, sizeof(DataPackage));
   }
