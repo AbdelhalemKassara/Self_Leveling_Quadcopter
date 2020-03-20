@@ -10,7 +10,7 @@ void setup() {
   radio.stopListening();
 }
 void loop() {
-  const char text[] = "Hello World";
+  const char text[] = "Please work";
   radio.write(&text, sizeof(text));
-  delay(1000);
+  //delay(10);
 }
