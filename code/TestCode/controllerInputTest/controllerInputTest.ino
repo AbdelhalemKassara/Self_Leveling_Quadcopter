@@ -20,8 +20,6 @@ bool ValDown;
 bool StopProp;
 };
 
-int val = 0;
-
 struct DataPackage Data;// Data is a variable that represents DataPackage
 
 // radio pins and address
@@ -55,7 +53,7 @@ void loop() {
   // to stop the fans of the drone
   Data.StopProp = digitalRead(Stop);
   
-val = analogRead(2);
+
   
   // test to see if controller works
   Serial.print("Stop button: ");
@@ -74,7 +72,8 @@ Serial.println();
   Serial.println(Data.YPos);
   
   Serial.print("pot:");
-  Serial.println(val);
+  Serial.println(analogRead(2));
+  
   radio.write(&Data, sizeof(DataPackage));
 
 }
