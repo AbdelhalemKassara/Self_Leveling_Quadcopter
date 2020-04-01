@@ -2,34 +2,32 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-// joystick
-const bool inputX = 0;
-const bool inputY = 1;
+struct Potentiometer {
+  struct Joystick {
+    static const byte X = 1;
+    static const byte Y = 0;
+  }; struct Joystick Joy;
 
-// buttons
-const byte Up = 4;
-unsigned long lastDebounceTimeUP = 0;
-bool lastButtonStateUP = LOW;
-bool buttonStateUP;
+  struct Throttle {
+    static const byte Pin = 2;
+    byte Val = 0;
+  }; struct Throttle Throttle;
 
-const byte Down = 3;
-unsigned long lastDebounceTimeDOWN = 0;
-bool lastButtonStateDOWN = LOW;
-bool buttonStateDOWN;
+}; struct Potentiometer Pot;
 
-const byte Stop = 2;
-unsigned long lastDebounceTimeSTOP = 0;
-bool lastButtonStateSTOP = LOW;
-bool buttonStateSTOP;
+struct Buttons {
+  struct Stop {
+    static const byte Pin = 2;
+  }; struct Stop Stop;
+
+}; struct Buttons But;
 
 struct DataPackage {
   byte XPos;
   byte YPos;
-  bool ValUp;
-  bool ValDown;
+  byte Throttle;
   bool StopProp;
 };
-
 struct DataPackage Data;
 
 // radio pins and address
@@ -37,9 +35,7 @@ RF24 radio(7, 8); // defines the CE and CSN pins as pin 7 and 8
 const byte address[6] = "00001";
 
 void setup() {
-  pinMode(Up, INPUT);
-  pinMode(Down, INPUT);
-  pinMode(Stop, INPUT);
+  pinMode(But.Stop.Pin, INPUT);
 
   radio.begin();
   radio.openWritingPipe(address);
@@ -48,37 +44,16 @@ void setup() {
 }
 
 void loop() {
-  Data.XPos = map(analogRead(inputX), 0, 1023, 0, 255);
-  Data.YPos = map(analogRead(inputY), 0, 1023, 0, 255);
-  Data.ValUp = Debounce(Up , lastDebounceTimeUP , lastButtonStateUP , buttonStateUP);
-  Data.ValDown = Debounce(Down , lastDebounceTimeDOWN , lastButtonStateDOWN , buttonStateDOWN);
-  Data.StopProp = Debounce(Stop , lastDebounceTimeSTOP , lastButtonStateSTOP , buttonStateSTOP);
+  //joystick
+  Data.XPos = map(analogRead(Pot.Joy.X), 0, 1023, 0, 255);
+  Data.YPos = map(analogRead(Pot.Joy.Y), 0, 1023, 0, 255);
+
+  //Throttle
+  Pot.Throttle.Val = map(analogRead(Pot.Throttle.Pin), 0, 1023, 0, 255);//stores the value of the pot so that I won't need to run this twice in the next line
+  Data.Throttle = Pot.Throttle.Val > 4 ? Pot.Throttle.Val : 0;// the potetiometer does not always fully go back to 0
+
+  //Button
+  Data.StopProp = digitalRead(But.Stop.Pin);
 
   radio.write(&Data, sizeof(DataPackage));
-}
-
-
-bool Debounce(int Button , unsigned long lastDebounceTime , int lastButtonState , bool buttonState) {
-
-
-  unsigned long debounceDelay = 50;
-
-  bool reading = digitalRead(Button);
-
-  if (reading != lastButtonState) {
-
-    lastDebounceTime = millis();
-  }
-
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-
-    if (reading != buttonState) {
-      buttonState = reading;
-    }
-    return buttonState;
-
-  }
-
-  lastButtonState = reading;
-
 }
