@@ -6,11 +6,11 @@ const byte address[6] = "00001";
 
 // motors
 // front
-float M1Speed; //black FL
-float M2Speed; //red FR
+byte M1Speed; //black FL
+byte M2Speed; //red FR
 //rear
-float M3Speed; //yellow RL
-float M4Speed; //blue RR
+byte M3Speed; //yellow RL
+byte M4Speed; //blue RR
 
 float DistSens = 0.25; // the sensitivity of the distribution
 
@@ -46,33 +46,40 @@ void setup() {
 }
 
 void loop() {
-  if (radio.available()) {  //if the controller and drone are conected
+  if (radio.available()) {  //if the controller is not conected
     radio.read(&Data, sizeof(DataPackage));
+    if (Data.StopProp) {
+      AllMin();
+    }
+    else {
+      float DiffX = (Data.XPos - 128);//to bring the center value to 0 from 128
+      float DiffY = (Data.YPos - 128);
+      float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
+      float Sensitivity = DistSens * Data.Throttle / 510; // / 255) * DistSens * (Data.Throttle / 2)
 
-    float testX = (Data.XPos - 128);
-    float testY = (Data.YPos - 128);//* DistSens
-    M1Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((-testY + testX) / 255) * DistSens * (Data.Throttle / 2); //goes past the max when throttle is set to max
-    M2Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((-testY - testX) / 255) * DistSens * (Data.Throttle / 2); // (Data.Throttle/2)
-    M3Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((+testY + testX) / 255) * DistSens * (Data.Throttle / 2); //max 1 min -1
-    M4Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((+ testY - testX) / 255) * DistSens * (Data.Throttle / 2); //sens * max = subtract
-
-    Serial.write(12);//ASCII for a Form
-    Serial.println(M1Speed);
-    Serial.println(M2Speed);
-    Serial.println(M3Speed);
-    Serial.println(M4Speed);
-    Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");// decreases the amount of flashing in putty
-
+      M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
+      M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
+      M3Speed = (byte)(AvSpeed + ((+DiffY + DiffX) * Sensitivity));
+      M4Speed = (byte)(AvSpeed + ((+DiffY - DiffX) * Sensitivity));
+    }
+    PrintSpeed();//test var
   }
-  else { //if they are not connected
-
+  else { //if controller is not connected
+    AllMin();
   }
 
 
-  //UpdateSpeed();//updates the speed of the propellers of the drone once every loop
+  UpdateSpeed();//updates the speed of the propellers of the drone once every loop
 }
 
-
+void PrintSpeed() {
+  Serial.write(12);//ASCII for a Form
+  Serial.println(M1Speed);
+  Serial.println(M2Speed);
+  Serial.println(M3Speed);
+  Serial.println(M4Speed);
+  Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");// decreases the amount of flashing in putty
+}
 // functions
 void UpdateSpeed() {
   OutM1.write(M1Speed);
@@ -108,5 +115,4 @@ void AllMin() {
   M3Speed = 0;
   M4Speed = 0;
   UpdateSpeed();
-
 }
