@@ -4,6 +4,8 @@
 RF24 radio(7, 8);
 const byte address[6] = "00001";
 
+boolean EStop = false;
+
 // motors
 // front
 byte M1Speed; //black FL
@@ -48,7 +50,10 @@ void setup() {
 void loop() {
   if (radio.available()) {  //if the controller is not conected
     radio.read(&Data, sizeof(DataPackage));
-    if (Data.StopProp) {
+
+
+
+    if (EStop) {
       AllMin();
     }
     else {
@@ -61,13 +66,15 @@ void loop() {
       M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
       M3Speed = (byte)(AvSpeed + ((+DiffY + DiffX) * Sensitivity));
       M4Speed = (byte)(AvSpeed + ((+DiffY - DiffX) * Sensitivity));
+
+      EStop = Data.StopProp;
     }
-    PrintSpeed();//test var
   }
   else { //if controller is not connected
     AllMin();
   }
 
+    PrintSpeed();//test var
 
   UpdateSpeed();//updates the speed of the propellers of the drone once every loop
 }
