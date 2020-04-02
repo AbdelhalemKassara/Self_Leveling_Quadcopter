@@ -6,11 +6,13 @@ const byte address[6] = "00001";
 
 // motors
 // front
-byte M1Speed; //black FL
-byte M2Speed; //red FR
+float M1Speed; //black FL
+float M2Speed; //red FR
 //rear
-byte M3Speed; //yellow RL
-byte M4Speed; //blue RR
+float M3Speed; //yellow RL
+float M4Speed; //blue RR
+
+float DistSens = 0.25; // the sensitivity of the distribution
 
 Servo OutM1;
 Servo OutM2;
@@ -20,15 +22,13 @@ Servo OutM4;
 struct DataPackage {
   byte XPos;
   byte YPos;
-  bool ValUp;
-  bool ValDown;
+  byte Throttle;
   bool StopProp;
-};
-
-struct DataPackage Data;
+}; struct DataPackage Data;
 
 
 void setup() {
+  Serial.begin(9600);
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
@@ -46,13 +46,30 @@ void setup() {
 }
 
 void loop() {
-  
-  if (radio.available()) {  //gets data from the controller
+  if (radio.available()) {  //if the controller and drone are conected
     radio.read(&Data, sizeof(DataPackage));
+
+    float testX = (Data.XPos - 128);
+    float testY = (Data.YPos - 128);//* DistSens
+    M1Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((-testY + testX) / 255) * DistSens * (Data.Throttle / 2); //goes past the max when throttle is set to max
+    M2Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((-testY - testX) / 255) * DistSens * (Data.Throttle / 2); // (Data.Throttle/2)
+    M3Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((+testY + testX) / 255) * DistSens * (Data.Throttle / 2); //max 1 min -1
+    M4Speed =  map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128) + ((+ testY - testX) / 255) * DistSens * (Data.Throttle / 2); //sens * max = subtract
+
+    Serial.write(12);//ASCII for a Form
+    Serial.println(M1Speed);
+    Serial.println(M2Speed);
+    Serial.println(M3Speed);
+    Serial.println(M4Speed);
+    Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");// decreases the amount of flashing in putty
+
+  }
+  else { //if they are not connected
+
   }
 
 
-  UpdateSpeed();//updates the speed of the propellers of the drone once every loop
+  //UpdateSpeed();//updates the speed of the propellers of the drone once every loop
 }
 
 

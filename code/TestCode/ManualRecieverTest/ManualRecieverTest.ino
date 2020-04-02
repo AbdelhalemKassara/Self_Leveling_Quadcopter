@@ -35,6 +35,6 @@ void loop() {
   Serial.println("Stop Button");-
   Serial.println(Data.StopProp);
 
-  Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+  Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");// decreases the amount of flashing in putty
  }
 }
