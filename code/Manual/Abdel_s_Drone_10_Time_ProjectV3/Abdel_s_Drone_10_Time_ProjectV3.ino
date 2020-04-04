@@ -34,8 +34,8 @@ void setup() {
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
-  OutM3.attach(5, 1000, 2000);
-  OutM4.attach(6, 1000, 2000);
+  OutM3.attach(6, 1000, 2000);
+  OutM4.attach(5, 1000, 2000);
 
   SetupMotorController();
 
@@ -51,7 +51,7 @@ void loop() {
   if (radio.available()) {  //if the controller is not conected
     radio.read(&Data, sizeof(DataPackage));
 
-
+    Serial.println("test");
 
     if (EStop) {
       AllMin();
@@ -61,6 +61,7 @@ void loop() {
       float DiffY = (Data.YPos - 128);
       float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
       float Sensitivity = DistSens * Data.Throttle / 510; // / 255) * DistSens * (Data.Throttle / 2)
+
 
       M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
       M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
@@ -74,7 +75,7 @@ void loop() {
     AllMin();
   }
 
-    PrintSpeed();//test var
+  PrintSpeed();//test var
 
   UpdateSpeed();//updates the speed of the propellers of the drone once every loop
 }
