@@ -30,7 +30,6 @@ struct DataPackage {
 
 
 void setup() {
-  Serial.begin(9600);
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
@@ -51,8 +50,6 @@ void loop() {
   if (radio.available()) {  //if the controller is not conected
     radio.read(&Data, sizeof(DataPackage));
 
-    Serial.println("test");
-
     if (EStop) {
       AllMin();
     }
@@ -60,8 +57,7 @@ void loop() {
       float DiffX = (Data.XPos - 128);//to bring the center value to 0 from 128
       float DiffY = (Data.YPos - 128);
       float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
-      float Sensitivity = DistSens * Data.Throttle / 510; // / 255) * DistSens * (Data.Throttle / 2)
-
+      float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
 
       M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
       M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
@@ -75,19 +71,10 @@ void loop() {
     AllMin();
   }
 
-  PrintSpeed();//test var
-
   UpdateSpeed();//updates the speed of the propellers of the drone once every loop
 }
 
-void PrintSpeed() {
-  Serial.write(12);//ASCII for a Form
-  Serial.println(M1Speed);
-  Serial.println(M2Speed);
-  Serial.println(M3Speed);
-  Serial.println(M4Speed);
-  Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");// decreases the amount of flashing in putty
-}
+
 // functions
 void UpdateSpeed() {
   OutM1.write(M1Speed);

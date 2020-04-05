@@ -3,14 +3,11 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-// make code more efficient
-// reciver
+
 RF24 radio(7, 8);
 const byte address[6] = "00001";
 
-//Ultrasonic sensor var
-const int trigPin = 4;
-const int echoPin = 2;
+
 
 // gyro sensor
 int GyX, GyY, GyZ;
@@ -23,15 +20,15 @@ boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
 
-int HeightOfDrone;
-
 // motors
 // front
+//put in an array
 byte M1Speed; //black FL
 byte M2Speed; //red FR
 //rear
 byte M3Speed; //yellow RL
 byte M4Speed; //blue RR
+
 
 Servo OutM1;
 Servo OutM2;
@@ -41,18 +38,13 @@ Servo OutM4;
 struct DataPackage {
   byte XPos;
   byte YPos;
-  bool ValUp;
-  bool ValDown;
+  byte Throttle;
   bool StopProp;
-};
-
-struct DataPackage Data;
+};struct DataPackage Data;
 
 
 void setup() {
-  //gyroscope
-  pinMode(trigPin,OUTPUT);
-  pinMode(echoPin,INPUT);
+  
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
@@ -77,14 +69,11 @@ void setup() {
 }
 
 void loop() {
-  //gyroscope
-  digitalWrite(trigPIn,LOW);
-  //need to still loop through the rest of the code
-  digitalWrite(trigPin,HIGH);
-
-  //
-  if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
+    if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
     radio.read(&Data, sizeof(DataPackage));
+  }else{
+  //write code for doing nothing when the contorller is not connected //waits for 5 seconds then tries to land the drone
+  //when going down it waits until there is not acceleration in the y axis//create a function for landing 
   }
 
   // landing
@@ -111,6 +100,9 @@ void loop() {
 
 }
 
+void CalMotorSpeed(){
+  
+}
 
 // functions
 void UpdateSpeed() {
@@ -198,7 +190,6 @@ void setup_mpu_6050_registers() {
 }
 
 void GyroAngles() {
-
   GyX -= GyXOff;
   GyY -= GyYOff;
   GyZ -= GyZOff;
@@ -211,11 +202,9 @@ void GyroAngles() {
   //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
   GyPitch += GyRoll * sin(GyZ * 0.000001066); //output values?? possibly for staying still
   GyRoll -= GyPitch * sin(GyZ * 0.000001066);// output values?? possibly for staying still
-
 }
 
 void AccelAngles() {
-
   TotalAcc = sqrt((AcX * AcX) + (AcY * AcY) + (AcZ * AcZ));
   //57.296 = 1 / (3.142 / 180)// The Arduino asin function is in radians
   AccPitch = asin((float)AcY / TotalAcc) * 57.296;
@@ -224,8 +213,6 @@ void AccelAngles() {
   //Place the MPU-6050 spirit level and note the values in the following two lines for calibration
   AccPitch -= -0.90;                                              //Accelerometer calibration value for pitch
   AccRoll -= 0.68;                                               //Accelerometer calibration value for roll
-
-
 }
 
 void CorrGyDrift() {
