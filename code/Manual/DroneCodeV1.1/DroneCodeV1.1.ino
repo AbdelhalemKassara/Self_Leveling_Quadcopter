@@ -1,3 +1,6 @@
+/*
+ * this version of the code fixes the problem where you could not use the max motor speed
+ */
 #include <Servo.h>
 #include <RF24.h>
 
@@ -56,9 +59,9 @@ void loop() {
     else {
       float DiffX = (Data.XPos - 128);//to bring the center value to 0 from 128
       float DiffY = (Data.YPos - 128);
-      float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
+      float AvSpeed = map(Data.Throttle, 0, 255, 0, 180 - DistSens * 180);
       float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
-
+      
       M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
       M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
       M3Speed = (byte)(AvSpeed + ((+DiffY + DiffX) * Sensitivity));

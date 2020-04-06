@@ -6,8 +6,7 @@
 
 RF24 radio(7, 8);
 const byte address[6] = "00001";
-
-
+long TimeSinceLastCon = 0;
 
 // gyro sensor
 int GyX, GyY, GyZ;
@@ -29,7 +28,6 @@ byte M2Speed; //red FR
 byte M3Speed; //yellow RL
 byte M4Speed; //blue RR
 
-
 Servo OutM1;
 Servo OutM2;
 Servo OutM3;
@@ -40,22 +38,19 @@ struct DataPackage {
   byte YPos;
   byte Throttle;
   bool StopProp;
-};struct DataPackage Data;
+}; struct DataPackage Data;
 
 
 void setup() {
-  
   // motors
   OutM1.attach(9, 1000, 2000);
   OutM2.attach(3, 1000, 2000);
   OutM3.attach(5, 1000, 2000);
   OutM4.attach(6, 1000, 2000);
-
   SetupMotorController();
 
   //gyro/accel sensor
   Wire.begin();
-
   setup_mpu_6050_registers();
   OffSetGyro();
 
@@ -65,25 +60,27 @@ void setup() {
   radio.setPALevel(RF24_PA_MAX);
   radio.startListening();
 
+  //timer for the 250hz frequency of the program
   Timer = micros();
 }
 
 void loop() {
-    if (radio.available()) {  // if angles are incorrect try 2 while loops using different timers
+  if (radio.available()) {
     radio.read(&Data, sizeof(DataPackage));
-  }else{
-  //write code for doing nothing when the contorller is not connected //waits for 5 seconds then tries to land the drone
-  //when going down it waits until there is not acceleration in the y axis//create a function for landing 
+    TimeSinceLastCon = micros();//stores the last time the controllers was connected
+
+  } else {
+    SetNutralValForCon();
+    if (micros() - TimeSinceLastCon > 5000000) { //if the controller has not been connected in 5 seconds
+    //when going down it waits until there is not acceleration in the y axis//create a function for landing
+    //call landing function here
+    }
   }
 
-  // landing
-  if (Data.StopProp == HIGH) {
-    AllMin();
-  }
+
   GetPosition();
   GyroAngles();
   //x get angles from here if you want to have very detailed
-  // max motor speed is 180
   // need to get the height of the drone
   AccelAngles();
   CorrGyDrift();
@@ -97,14 +94,29 @@ void loop() {
     //do nothing unitl the time reaches 4000us for the required 250Hz frequency
   }
   Timer = micros();
-
 }
 
-void CalMotorSpeed(){
-  
+void SetNutralValForCon() {
+  Data.XPos = 128;
+  Data.YPos = 128;
+  Data.Throttle = 0;
 }
-
 // functions
+void CalMotorSpeed() {
+  float DistSens = 0.25;//to control the sensitivity of the drone
+
+  float DiffX = (Data.XPos - 128);//to bring the center value to 0 from 128
+  float DiffY = (Data.YPos - 128);
+  float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
+  float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
+
+  M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
+  M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
+  M3Speed = (byte)(AvSpeed + ((+DiffY + DiffX) * Sensitivity));
+  M4Speed = (byte)(AvSpeed + ((+DiffY - DiffX) * Sensitivity));
+
+}
+
 void UpdateSpeed() {
   OutM1.write(M1Speed);
   OutM2.write(M2Speed);
