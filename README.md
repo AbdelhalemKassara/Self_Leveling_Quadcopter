@@ -9,6 +9,8 @@ Back of the controller
 ![](Images/TopDrone.jpg)
 Topview of the drone
 
+Sorry for the mess of electrical tape I ran out of plexi glass and Screws
+
 ## Getting Started
 These instructions will get you a flying drone.
 
