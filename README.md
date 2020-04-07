@@ -1,12 +1,13 @@
 # Self Leveling Quadcopter
+<video src="ImagesAndVideos/DroneTestFlightsCompilation.mp4" poster="ImagesAndVideos/TopDrone.jpg" width="320" height="200" controls preload></video>
 
-![](Images/FrontController.jpg)
+![](ImagesAndVideos/FrontController.jpg)
 >Front of the controller
 
-![](Images/BackController.jpg)
+![](ImagesAndVideos/BackController.jpg)
 >Back of the controller
 
-![](Images/TopDrone.jpg)
+![](ImagesAndVideos/TopDrone.jpg)
 >Topview of the drone
 
 Sorry for the mess of Electrical Tape I ran out of Plexi Glass and Screws.
