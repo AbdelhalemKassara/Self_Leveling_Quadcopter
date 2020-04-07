@@ -1,5 +1,13 @@
 # Self Leveling Quadcopter
+
+![](Images/FrontController.jpg)
+Front of the controller
+
 ![](Images/BackController.jpg)
+Back of the controller
+
+![](Images/TopDrone.jpg)
+Topview of the drone
 
 ## Getting Started
 These instructions will get you a flying drone.
