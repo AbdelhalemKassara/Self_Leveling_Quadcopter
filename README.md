@@ -1,4 +1,5 @@
 # Self Leveling Quadcopter
+[](Images/BackController.jpg)
 
 ## Getting Started
 These instructions will get you a flying drone.
