@@ -1,5 +1,5 @@
 # Self Leveling Quadcopter
-<video src="ImagesAndVideos/DroneTestFlightsCompilation.mp4" poster="ImagesAndVideos/TopDrone.jpg" width="320" height="200" controls preload></video>
+[Video of the Drone Flying](https://youtu.be/ctLI9JnbgVA)
 
 ![](ImagesAndVideos/FrontController.jpg)
 >Front of the controller
