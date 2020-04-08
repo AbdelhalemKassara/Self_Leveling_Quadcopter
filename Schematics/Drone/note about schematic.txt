@@ -1,2 +1,0 @@
-green cable is sda
-ornage cable is scl
