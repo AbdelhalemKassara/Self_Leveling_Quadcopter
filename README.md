@@ -26,7 +26,7 @@ These instructions will get you a flying drone.
 
 ### Installing
 Download the source code.
-```
+```bash
 git clone https://github.com/AbdelhalemKassara/Self_Leveling_Quadcopter.git
 ```
 
