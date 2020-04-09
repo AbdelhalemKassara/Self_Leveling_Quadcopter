@@ -12,10 +12,13 @@
 
 Sorry for the mess of Electrical Tape I ran out of Plexi Glass and Screws. Also the frame cracked so I put Electrical Tape over the screws for the motors just in case)
 
+I have writen 2 versions of the code Manual and SelfLevel. Manual you use the joystick to change the amount of power going to each motor. Self Level you use the joystick to change the tilt angle and the arduino does all the leveling for you.
+
 ## Getting Started
 These instructions will get you a flying drone.
 
 ### Prerequisites
+
 #### Parts List
   * 2 Arduinos 
   * 3 10k Resistors
@@ -31,6 +34,12 @@ These instructions will get you a flying drone.
   * 1 9v Battery
   * 1 Plexiglass Drone Frame
   * 1 Plexiglass Controller Frame
+
+### Steps
+1. Using The drawing provided cut out the drone frame, controller frame, 4 brackets for the motor, and 4 spacers.
+1. Wire up the controller and drone using the schematics provided.
+1. Upolad the code to the arduino. (there are 2 folders Manual and SelfLevel)
+1. Start flying.
 
 ### Installing
 Download the source code.
