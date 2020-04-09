@@ -10,7 +10,7 @@
 ![](ImagesAndVideos/TopDrone.jpg)
 >Topview of the drone
 
-Sorry for the mess of Electrical Tape I ran out of Plexi Glass and Screws.
+Sorry for the mess of Electrical Tape I ran out of Plexi Glass and Screws. Also the frame cracked so I put Electrical Tape over the screws for the motors just in case)
 
 ## Getting Started
 These instructions will get you a flying drone.
