@@ -36,15 +36,11 @@ These instructions will get you a flying drone.
 
 ### Installing
 #### Steps
+ 1. Download the repository.
  1. Using The drawing provided cut out the drone frame, controller frame, 4 brackets for the motor, and 4 spacers.
  1. Wire up the controller and drone using the schematics provided.
  1. Upolad the code to the arduino. (there are 2 folders Manual and SelfLevel)
  1. Start flying.
  
-Download the source code.
-```bash
-git clone https://github.com/AbdelhalemKassara/Self_Leveling_Quadcopter.git
-```
-
 ## Built With 
 C++
