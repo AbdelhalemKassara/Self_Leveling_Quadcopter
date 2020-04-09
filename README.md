@@ -35,11 +35,11 @@ These instructions will get you a flying drone.
   * 1 Plexiglass Drone Frame
   * 1 Plexiglass Controller Frame
 
-### Steps
-1. Using The drawing provided cut out the drone frame, controller frame, 4 brackets for the motor, and 4 spacers.
-1. Wire up the controller and drone using the schematics provided.
-1. Upolad the code to the arduino. (there are 2 folders Manual and SelfLevel)
-1. Start flying.
+#### Steps
+ 1. Using The drawing provided cut out the drone frame, controller frame, 4 brackets for the motor, and 4 spacers.
+ 1. Wire up the controller and drone using the schematics provided.
+ 1. Upolad the code to the arduino. (there are 2 folders Manual and SelfLevel)
+ 1. Start flying.
 
 ### Installing
 Download the source code.
