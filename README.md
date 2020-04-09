@@ -18,11 +18,10 @@ I have writen 2 versions of the code Manual and SelfLevel. Manual you use the jo
 These instructions will get you a flying drone.
 
 ### Prerequisites
-
 #### Parts List
   * 2 Arduinos 
-  * 3 10k Resistors
-  * 1 10k Potentiometer
+  * 3 10K Resistors
+  * 1 10K Potentiometer
   * 1 KY-023 Analog Joystick
   * 3 Push Buttons
   * 1 MPU6050 Gyroscope and Accelerometer
@@ -31,7 +30,7 @@ These instructions will get you a flying drone.
   * 4 BLDC Motors 
   * 4 Motor Controllers 
   * 1 3S 40C 2200mah Lipo Battery
-  * 1 9v Battery
+  * 1 9V Battery
   * 1 Plexiglass Drone Frame
   * 1 Plexiglass Controller Frame
 
