@@ -16,11 +16,21 @@ Sorry for the mess of Electrical Tape I ran out of Plexi Glass and Screws. Also 
 These instructions will get you a flying drone.
 
 ### Prerequisites
-* 2 arduinos 
-* 4 motors 
-* 4 motorcontrollers 
-* 1 wireless receivers
-* 1 wireless transmitters
+#### Parts List
+  * 2 Arduinos 
+  * 3 10k Resistors
+  * 1 10k Potentiometer
+  * 1 KY-023 Analog Joystick
+  * 3 Push Buttons
+  * 1 MPU6050 Gyroscope and Accelerometer
+  * 1 Wireless Receivers
+  * 1 Wireless Transmitters
+  * 4 BLDC Motors 
+  * 4 Motor Controllers 
+  * 1 3S 40C 2200mah Lipo Battery
+  * 1 9v Battery
+  * 1 Plexiglass Drone Frame
+  * 1 Plexiglass Controller Frame
 
 ### Installing
 Download the source code.
@@ -29,4 +39,4 @@ git clone https://github.com/AbdelhalemKassara/Self_Leveling_Quadcopter.git
 ```
 
 ## Built With 
-arduino(c++)
+C++
