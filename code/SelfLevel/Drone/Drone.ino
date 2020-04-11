@@ -18,6 +18,7 @@ float GyPitch, GyRoll;
 boolean set_gyro_angles;
 float AccRoll, AccPitch;
 float Pitch, Roll;
+const int MaxTurnAngle = 30;//stores the max value that the drone can change is angle by
 
 // motors
 // front
@@ -40,6 +41,7 @@ struct DataPackage {
   bool StopProp;
 }; struct DataPackage Data;
 
+bool EStop = false;
 
 void setup() {
   // motors
@@ -72,22 +74,17 @@ void loop() {
   } else {
     SetNutralValForCon();
     if (micros() - TimeSinceLastCon > 5000000) { //if the controller has not been connected in 5 seconds
-    //when going down it waits until there is not acceleration in the y axis//create a function for landing
-    //call landing function here
+      //when going down it waits until there is not acceleration in the y axis//create a function for landing
+      //call landing function here
     }
   }
 
-
   GetPosition();
   GyroAngles();
-  //x get angles from here if you want to have very detailed
-  // need to get the height of the drone
+  Leveling();
   AccelAngles();
   CorrGyDrift();
   CompFilter();
-  // get angles here if you want average or rounded
-
-
   UpdateSpeed();
 
   while (micros() - Timer < 4000) {                               //Wait until the Timer reaches 4000us (250Hz) before starting the next loop
@@ -96,25 +93,34 @@ void loop() {
   Timer = micros();
 }
 
+// functions
+void Leveling() {
+  if ((abs(GyPitch) > MaxTurnAngle) || (abs(GyRoll) > MaxTurnAngle)) {
+    M1Speed = 0;
+    M2Speed = 0;
+    M3Speed = 0;
+    M4Speed = 0;
+  }
+  else {
+    float DistSens = 0.25;//to control the sensitivity of the drone
+
+    float Pitch = (Data.XPos - 128) + (GyPitch / MaxTurnAngle) * 128;
+    float Roll  = (Data.YPos - 128) + (GyRoll / MaxTurnAngle) * 128; // adds the speed needed for turning and leveling the drone
+    float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 256);//128 * 2 for the controller and self leveling
+    float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
+
+    M1Speed = (byte)(AvSpeed + ((-Roll + Pitch) * Sensitivity));//put motorspeed in an array
+    M2Speed = (byte)(AvSpeed + ((-Roll - Pitch) * Sensitivity));
+    M3Speed = (byte)(AvSpeed + ((+Roll + Pitch) * Sensitivity));
+    M4Speed = (byte)(AvSpeed + ((+Roll - Pitch) * Sensitivity));
+  }
+}
+
+
 void SetNutralValForCon() {
   Data.XPos = 128;
   Data.YPos = 128;
   Data.Throttle = 0;
-}
-// functions
-void CalMotorSpeed() {
-  float DistSens = 0.25;//to control the sensitivity of the drone
-
-  float DiffX = (Data.XPos - 128);//to bring the center value to 0 from 128
-  float DiffY = (Data.YPos - 128);
-  float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 128);
-  float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
-
-  M1Speed = (byte)(AvSpeed + ((-DiffY + DiffX) * Sensitivity));//put motorspeed in an array
-  M2Speed = (byte)(AvSpeed + ((-DiffY - DiffX) * Sensitivity));
-  M3Speed = (byte)(AvSpeed + ((+DiffY + DiffX) * Sensitivity));
-  M4Speed = (byte)(AvSpeed + ((+DiffY - DiffX) * Sensitivity));
-
 }
 
 void UpdateSpeed() {
