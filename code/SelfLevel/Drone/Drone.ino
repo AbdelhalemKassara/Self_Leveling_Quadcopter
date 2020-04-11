@@ -72,10 +72,11 @@ void loop() {
     TimeSinceLastCon = micros();//stores the last time the controllers was connected
 
   } else {
-    SetNutralValForCon();
+    SetNutralValForJoyStick();
     if (micros() - TimeSinceLastCon > 5000000) { //if the controller has not been connected in 5 seconds
       //when going down it waits until there is not acceleration in the y axis//create a function for landing
       //call landing function here
+      Landing();
     }
   }
 
@@ -94,6 +95,24 @@ void loop() {
 }
 
 // functions
+void Landing() {
+  GetPosition();
+  if (AcY > -100) {
+    if (Data.Throttle = 0) {
+      exit(0);
+    } else {
+      Data.Throttle--;
+    }
+  }
+  GyroAngles();
+  Leveling();
+  AccelAngles();
+  CorrGyDrift();
+  CompFilter();
+  UpdateSpeed();
+
+}
+
 void Leveling() {
   if ((abs(GyPitch) > MaxTurnAngle) || (abs(GyRoll) > MaxTurnAngle)) {
     M1Speed = 0;
@@ -106,7 +125,7 @@ void Leveling() {
 
     float Pitch = (Data.XPos - 128) + (GyPitch / MaxTurnAngle) * 128;
     float Roll  = (Data.YPos - 128) + (GyRoll / MaxTurnAngle) * 128; // adds the speed needed for turning and leveling the drone
-    float AvSpeed = map(Data.Throttle, 0, 255, 0, 128 - DistSens * 256);//128 * 2 for the controller and self leveling
+    float AvSpeed = map(Data.Throttle, 0, 255, 0, 180 - DistSens * 360);//180 * 2 for the controller and self leveling(180 is the max speed of the motors)
     float Sensitivity = DistSens * Data.Throttle / 510; // 2*255
 
     M1Speed = (byte)(AvSpeed + ((-Roll + Pitch) * Sensitivity));//put motorspeed in an array
@@ -117,10 +136,9 @@ void Leveling() {
 }
 
 
-void SetNutralValForCon() {
+void SetNutralValForJoyStick() {
   Data.XPos = 128;
   Data.YPos = 128;
-  Data.Throttle = 0;
 }
 
 void UpdateSpeed() {
